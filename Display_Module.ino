@@ -6,6 +6,7 @@
 //
 // For one I was using this was the 0x9341 with a Resolution of 320x240.
 
+
 #include <UTFTGLUE.h>
 UTFTGLUE tft(0x9341,A5,A4,A3,A2,A0); 
 
@@ -20,6 +21,7 @@ UTFTGLUE tft(0x9341,A5,A4,A3,A2,A0);
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
 
+
 //Temperature & Humidity Sensor
 #include <DHT.h>
 #define DHTPIN 30
@@ -28,6 +30,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 float Humidity_OLD = 0;
 float Temperature_OLD = 0;
+
 
 //Buttons ( can be changed to any Pin on the Mega. 
 //The only open Ports on an Arduino Uno with the Shield are only the 18th and 19th Pins)
@@ -49,6 +52,7 @@ int MenuValue = 0;
 int Menuvis = 1;
 int MenuValue_old = 99;
 
+
 //Module Infos
 int ActiveModule = 0;
 
@@ -63,31 +67,32 @@ void setup()
   pinMode(46, INPUT);
   pinMode(48, INPUT);
 
-
   // Setup the LCD
   tft.InitLCD();
   tft.setFont(SmallFont);
   tft.setColor(WHITE);
   tft.fillScreen(BLACK);
+}
 
 
-};
 
 //------------------------------------
 //----------------CODE----------------
 //------------------------------------
 
-void loop() {
+
+void loop() 
+{
   Serial.println(Menuvis);
   if (Menuvis == 1 ){
-
     Menu();
-
-  } else {
-
+  } 
+  else
+  {
     tft.fillScreen(BLACK);
 
-    switch (MenuValue) {
+    switch (MenuValue) 
+    {
       case 0:
         Temp_Humi();
         break;
@@ -120,17 +125,21 @@ void loop() {
         break;
       default:
         break;
-      }
     }
+  }
 }
 
-int Menu() {
+
+int Menu() 
+{
   DrawMenu();
-  while (Menuvis = 1) {
+  while (Menuvis = 1)
+  {
     Button_Check_val = digitalRead(Button_Check);
     MenuNav();
 
-    if (Button_Check_val == 1 && Menuvis == 1) {
+    if (Button_Check_val == 1 && Menuvis == 1) 
+    {
       --Menuvis;
       Serial.println("Lowerd Menu Vis by 1");
       return Menuvis = 0;
@@ -139,57 +148,68 @@ int Menu() {
 }
 
 
+void MenuNav() 
+{
+  ButtonU_val = digitalRead(ButtonU);
+  ButtonD_val = digitalRead(ButtonD);
 
-void MenuNav() {
-    ButtonU_val = digitalRead(ButtonU);
-    ButtonD_val = digitalRead(ButtonD);
-
-    if (ButtonU_val == HIGH && prevButtonU_val == LOW) {
+  if (ButtonU_val == HIGH && prevButtonU_val == LOW) 
+  {
       ++MenuValue;
-    } else if (ButtonD_val == HIGH && prevButtonD_val == LOW) {
+  }
+  else if (ButtonD_val == HIGH && prevButtonD_val == LOW)
+  {
       --MenuValue;
-    }
-    prevButtonU_val = ButtonU_val;
-    prevButtonD_val = ButtonD_val;
- 
-    if(MenuValue >=10) {
-      MenuValue = 0;
-    } else if ( MenuValue <= -1)  {
-      MenuValue = 9;
-    }
+  }
+  prevButtonU_val = ButtonU_val;
+  prevButtonD_val = ButtonD_val;
 
-    if (MenuValue != MenuValue_old) {
-      Update_SelectMenu();
-    }
-
-     MenuValue_old = MenuValue;    
-}
-
-
-void DrawMenu(){
-    Serial.println("DrawMenu");
-    tft.setFont(SmallFont);
-    tft.setColor(WHITE);
-    tft.print("1. [ ] -Luftfeuchtigkeit", 0 ,0);
-    tft.print("2. [ ] -Temperatur", 0, 11);
-    tft.print("3. [ ] -Millis since Start", 0 ,22);
-    tft.print("4. [ ] -", 0, 33);
-    tft.print("5. [ ] -", 0 ,44);
-    tft.print("6. [ ] -", 0, 55);
-    tft.print("7. [ ] -", 0, 66);
-    tft.print("8. [ ] -", 0, 77);
-    tft.print("9. [ ] -", 0, 88);
-    tft.print("10.[ ] -", 0, 99);
+  if(MenuValue >=10) 
+  {
+    MenuValue = 0;
+  }
+  else if ( MenuValue <= -1)
+  {
+    MenuValue = 9;
+  }
   
+  if (MenuValue != MenuValue_old)
+  {
     Update_SelectMenu();
+  }
+
+  MenuValue_old = MenuValue;    
 }
 
-void Update_SelectMenu(){
+
+void DrawMenu()
+{
+  Serial.println("DrawMenu");
+  tft.setFont(SmallFont);
+  tft.setColor(WHITE);
+  tft.print("1. [ ] -Luftfeuchtigkeit", 0 ,0);
+  tft.print("2. [ ] -Temperatur", 0, 11);
+  tft.print("3. [ ] -Millis since Start", 0 ,22);
+  tft.print("4. [ ] -", 0, 33);
+  tft.print("5. [ ] -", 0 ,44);
+  tft.print("6. [ ] -", 0, 55);
+  tft.print("7. [ ] -", 0, 66);
+  tft.print("8. [ ] -", 0, 77);
+  tft.print("9. [ ] -", 0, 88);
+  tft.print("10.[ ] -", 0, 99);
+
+  Update_SelectMenu();
+}
+
+
+void Update_SelectMenu()
+{
   tft.setColor(BLACK);
   tft.fillRect(30, 0, 39,240);
   
   tft.setColor(WHITE);
-  switch (MenuValue) {
+  switch (MenuValue) 
+  {
     case 0:
       tft.print("*", 32 ,0);
       break;
@@ -227,68 +247,77 @@ void Update_SelectMenu(){
 
 
 
-
 //-------------------------------------------------
 //------------Modules for Menu---------------------
 //-------------------------------------------------
 
-void no_module(){
-    tft.setColor(BLUE);
-    tft.fillRoundRect(100, 90, 220, 150);
-    tft.setColor(WHITE);
-    tft.fillRoundRect(105, 95, 215, 145);
-    tft.setColor(RED);
-    tft.setBackColor(WHITE);
-    tft.print("No Module", CENTER, 115);
 
+void no_module()
+{
+  tft.setColor(BLUE);
+  tft.fillRoundRect(100, 90, 220, 150);
+  tft.setColor(WHITE);
+  tft.fillRoundRect(105, 95, 215, 145);
+  tft.setColor(RED);
+  tft.setBackColor(WHITE);
+  tft.print("No Module", CENTER, 115);
+
+  tft.setColor(WHITE);
+  tft.setBackColor(BLACK);
+  tft.print("Going back to Main Menu in  ", CENTER, 180);
+  tft.print("5",265,180);
+  
+  for (int i = 5; i > 0; i--) 
+  {
+    tft.print(String(i), 265, 180);
+    delay(1000);
+    tft.setColor(BLACK);
+    tft.fillRect(260, 175, 270, 190);
     tft.setColor(WHITE);
-    tft.setBackColor(BLACK);
-    tft.print("Going back to Main Menu in  ", CENTER, 180);
-    tft.print("5",265,180);
-    
-    for (int i = 5; i > 0; i--) {
-      tft.print(String(i), 265, 180);
-      delay(1000);
-      tft.setColor(BLACK);
-      tft.fillRect(260, 175, 270, 190);
-      tft.setColor(WHITE);
   }
+
   Menuvis = 1;
   tft.fillScreen(BLACK);
 };
 
-void Temp_Humi(){
-  ActiveModule = 1;
-  while (ActiveModule == 1) {
-    Button_Check_val = digitalRead(Button_Check);
-    if (Button_Check_val == 1 && ActiveModule == 1) {
 
+void Temp_Humi()
+{
+  ActiveModule = 1;
+  while (ActiveModule == 1) 
+  {
+    Button_Check_val = digitalRead(Button_Check);
+
+    if (Button_Check_val == 1 && ActiveModule == 1) 
+    {
       tft.fillScreen(BLACK);
       ActiveModule = 0;
   	  Menuvis = 1;
       return ActiveModule, Menuvis;
 
-    } else {
-      
+    }
+    else
+    { 
       float Luftfeuchtigkeit = dht.readHumidity();
       float Temperatur = dht.readTemperature();
 
-      if (Luftfeuchtigkeit != Humidity_OLD && Temperatur != Temperature_OLD)  {  
+      if (Luftfeuchtigkeit != Humidity_OLD && Temperatur != Temperature_OLD)
+      {  
       
-      tft.setColor(BLACK);
-      tft.fillRect(0, 0, 180,22);
-      tft.setColor(WHITE);
-      tft.print("Luftfeuchtigkeit: ", 0 ,0);
-      tft.println(Luftfeuchtigkeit);
-      tft.print("Temperatur: ", 0, 11);
-      tft.println(Temperatur);
-      Humidity_OLD = Luftfeuchtigkeit;
-      Temperature_OLD = Temperatur;
+        tft.setColor(BLACK);
+        tft.fillRect(0, 0, 180,22);
+        tft.setColor(WHITE);
+        tft.print("Luftfeuchtigkeit: ", 0 ,0);
+        tft.println(Luftfeuchtigkeit);
+        tft.print("Temperatur: ", 0, 11);
+        tft.println(Temperatur);
+        Humidity_OLD = Luftfeuchtigkeit;
+        Temperature_OLD = Temperatur;
       }      
     }
   }
-  return;
 }
+
 
 //save for later use / copy paste often used commands
 //  tft.setColor(BLACK);
