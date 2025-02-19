@@ -7,11 +7,15 @@
 // For one I was using this was the 0x9341 with a Resolution of 320x240.
 
 
-#include <UTFTGLUE.h>
-UTFTGLUE tft(0x9341,A5,A4,A3,A2,A0); 
+#include <SPI.h>          // f.k. for Arduino-1.5.2
+#include "Adafruit_GFX.h"// Hardware-specific library
+#include <HX8347D_kbv.h>
+#include <MCUFRIEND_kbv.h>
+MCUFRIEND_kbv tft;
+//#include <Adafruit_TFTLCD.h>
+//Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
-
-//Colors
+// Assign human-readable names to some common 16-bit color values:
 #define	BLACK   0x0000
 #define	BLUE    0x001F
 #define	RED     0xF800
@@ -20,6 +24,9 @@ UTFTGLUE tft(0x9341,A5,A4,A3,A2,A0);
 #define MAGENTA 0xF81F
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
+
+uint16_t g_identifier;
+
 
 
 //Temperature & Humidity Sensor
@@ -61,19 +68,26 @@ void setup()
 {
   Serial.begin(9600);
   dht.begin();
-
 // Setup Pins
   pinMode(44, INPUT);
   pinMode(46, INPUT);
   pinMode(48, INPUT);
 
-  // Setup the LCD
-  tft.InitLCD();
-  tft.setFont(SmallFont);
-  tft.setColor(WHITE);
-  tft.fillScreen(BLACK);
-}
 
+  uint32_t when = millis(); //    while (!Serial) ;   //hangs a Leonardo until you connect a Serial
+  if (!Serial) delay(5000);           //allow some time for Leonardo
+  Serial.println("Serial took " + String((millis() - when)) + "ms to start");
+  static uint16_t identifier;
+  //    tft.reset();                 //we can't read ID on 9341 until begin()
+  g_identifier = tft.readID(); //
+  Serial.print("ID = 0x");
+  Serial.println(g_identifier, HEX);
+  if (g_identifier == 0x00D3 || g_identifier == 0xD3D3) g_identifier = 0x9481; // write-only shield
+  if (g_identifier == 0xFFFF) g_identifier = 0x9341; // serial
+
+    tft.begin(g_identifier);
+    tft.fillScreen(BLACK);
+}
 
 
 //------------------------------------
@@ -184,19 +198,20 @@ void MenuNav()
 
 void DrawMenu()
 {
+  tft.setTextSize(1);
   Serial.println("DrawMenu");
-  tft.setFont(SmallFont);
-  tft.setColor(WHITE);
-  tft.print("1. [ ] -Luftfeuchtigkeit", 0 ,0);
-  tft.print("2. [ ] -Temperatur", 0, 11);
-  tft.print("3. [ ] -Millis since Start", 0 ,22);
-  tft.print("4. [ ] -", 0, 33);
-  tft.print("5. [ ] -", 0 ,44);
-  tft.print("6. [ ] -", 0, 55);
-  tft.print("7. [ ] -", 0, 66);
-  tft.print("8. [ ] -", 0, 77);
-  tft.print("9. [ ] -", 0, 88);
-  tft.print("10.[ ] -", 0, 99);
+  tft.setTextColor(WHITE, BLACK);
+  tft.println("1. [ ] -Luftfeuchtigkeit");
+  tft.println("2. [ ] -Temperatur");
+  tft.println("3. [ ] -Millis since Start");
+  tft.println("4. [ ] -");
+  tft.println("5. [ ] -");
+  tft.println("6. [ ] -");
+  tft.println("7. [ ] -");
+  tft.println("8. [ ] -");
+  tft.println("9. [ ] -");
+  tft.println("10.[ ] -");
+  Serial.println("Done Drawing Menu");
 
   Update_SelectMenu();
 }
@@ -204,41 +219,50 @@ void DrawMenu()
 
 void Update_SelectMenu()
 {
-  tft.setColor(BLACK);
-  tft.fillRect(30, 0, 39,240);
+  tft.fillRect(22, 0, 5,240,BLACK);
   
-  tft.setColor(WHITE);
+  tft.setTextColor(WHITE);
   switch (MenuValue) 
   {
     case 0:
-      tft.print("*", 32 ,0);
+      tft.setCursor(24 ,0);
+      tft.print("*");
       break;
     case 1:
-      tft.print("*", 32 ,11);
+      tft.setCursor(24 ,11);
+      tft.print("*");
       break;
     case 2:
-      tft.print("*", 32 ,22);
+      tft.setCursor(24 ,22);
+      tft.print("*");
       break;
     case 3:
-      tft.print("*", 32 ,33);
+      tft.setCursor(24 ,33);
+      tft.print("*");
       break;
     case 4:
-      tft.print("*", 32 ,44);
+      tft.setCursor(24 ,44);
+      tft.print("*");
       break;
     case 5:
-      tft.print("*", 32 ,55);
+      tft.setCursor(24 ,55);
+      tft.print("*");
       break;
     case 6:
-      tft.print("*", 32 ,66);
+      tft.setCursor(24 ,66);
+      tft.print("*");
       break;
     case 7:
-      tft.print("*", 32 ,77);
+      tft.setCursor(24 ,77);
+      tft.print("*");
       break;
     case 8:
-      tft.print("*", 32 ,88);
+      tft.setCursor(24 ,88);
+      tft.print("*");
       break;
     case 9:
-      tft.print("*", 32 ,99);
+      tft.setCursor(24 ,99);
+      tft.print("*");
       break;
     default:
       break;
@@ -254,26 +278,24 @@ void Update_SelectMenu()
 
 void no_module()
 {
-  tft.setColor(BLUE);
-  tft.fillRoundRect(100, 90, 220, 150);
-  tft.setColor(WHITE);
-  tft.fillRoundRect(105, 95, 215, 145);
-  tft.setColor(RED);
-  tft.setBackColor(WHITE);
-  tft.print("No Module", CENTER, 115);
+  tft.setTextColor(BLUE,BLACK);
+  tft.fillRoundRect(100, 90, 220, 150,50,RED);
+  tft.setTextColor(WHITE,BLACK);
+  tft.fillRoundRect(105, 95, 215, 145,50,RED);
+  tft.setTextColor(RED,BLACK);
+  tft.print("No Module");
 
-  tft.setColor(WHITE);
-  tft.setBackColor(BLACK);
-  tft.print("Going back to Main Menu in  ", CENTER, 180);
-  tft.print("5",265,180);
+  tft.print("Going back to Main Menu in  ");
+  tft.setCursor(265,180);
+  tft.print("5");
   
   for (int i = 5; i > 0; i--) 
   {
-    tft.print(String(i), 265, 180);
+    tft.setCursor(265, 180);
+    tft.print(String(i));
     delay(1000);
-    tft.setColor(BLACK);
-    tft.fillRect(260, 175, 270, 190);
-    tft.setColor(WHITE);
+    tft.fillRect(260, 175, 270, 190, BLACK);
+
   }
 
   Menuvis = 1;
@@ -304,12 +326,11 @@ void Temp_Humi()
       if (Luftfeuchtigkeit != Humidity_OLD && Temperatur != Temperature_OLD)
       {  
       
-        tft.setColor(BLACK);
-        tft.fillRect(0, 0, 180,22);
-        tft.setColor(WHITE);
-        tft.print("Luftfeuchtigkeit: ", 0 ,0);
+        tft.fillRect(0, 0, 180,22,BLACK);
+        tft.setTextColor(WHITE);
+        tft.print("Luftfeuchtigkeit: ");
         tft.println(Luftfeuchtigkeit);
-        tft.print("Temperatur: ", 0, 11);
+        tft.print("Temperatur: ");
         tft.println(Temperatur);
         Humidity_OLD = Luftfeuchtigkeit;
         Temperature_OLD = Temperatur;
